@@ -1,13 +1,8 @@
 #!/usr/bin/env sh
-# post_install.sh
-# Meson sets DESTDIR and MESON_INSTALL_PREFIX for you.
-# MESON_SOURCE_ROOT points at your source tree.
-
-# this is empty unless you used DESTDIR, e.g. `DESTDIR=/foo ninja install`
-echo "DESTDIR   = '$DESTDIR'"
-echo "PREFIX    = '$MESON_INSTALL_PREFIX'"
 ADAPTER_DIR="${DESTDIR}${MESON_INSTALL_PREFIX}/adapters"
 
+# remove the .dylib or .so extension from all files in the adapters directory
+# this is how the micro-manager plugin loader expects the files to be named
 # for every file in the adapters directory
 for lib in "$ADAPTER_DIR"/*; do
     # if it ends with .dylib or .so, remove the extension

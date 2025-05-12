@@ -1,5 +1,3 @@
-# replace the version by running:
-# meson rewrite kwargs set project / version $(python scripts/extract_version.py)
 project(
   'mmcore-test-devices',
   'cpp',
@@ -9,9 +7,13 @@ project(
     'cpp_std=c++14',
     'prefix=' + meson.current_source_dir(),
     'libdir=adapters',
+    'bindir=adapters',
   ]
 )
-if host_machine.system() == 'darwin'
+is_windows = host_machine.system() == 'windows'
+is_darwin = host_machine.system() == 'darwin'
+
+if is_darwin
   add_project_arguments('-U_LIBCPP_ENABLE_ASSERTIONS', language: 'cpp')
 endif
 
@@ -23,24 +25,23 @@ msgpack_dep = dependency('msgpack-cxx', fallback: ['msgpack-cxx', 'msgpack_cxx_d
 boost_dep = dependency('boost', modules: ['thread', 'system'], fallback: ['boost', 'boost_dep'], include_type: 'system')
 
 
-device_cpp_args = []
-if host_machine.system() == 'windows'
-    device_cpp_args += [
+if is_windows
+    device_cpp_args = [
         '/wd4101',  # equivalent to -Wno-unused-but-set-variable
         '/wd5038',  # equivalent to -Wno-reorder
         '/wd4624',  # equivalent to -Wno-unused-private-field
+        '-DNOMINMAX',
     ]
 else
-    device_cpp_args += [
+    device_cpp_args = [
         '-Wno-unused-but-set-variable',
         '-Wno-reorder',
         '-Wno-unused-private-field',
         '-Wno-return-type',
     ]
+    meson.add_install_script('post_install.sh')
 endif
-if host_machine.system() == 'windows'
-    device_cpp_args += ['-DNOMINMAX']
-endif
+
 
 # DEMO CAMERA -----------------------------
 
@@ -113,4 +114,4 @@ install_data(
   'src/MMConfig_demo.cfg',
   install_dir: get_option('libdir')
 )
-meson.add_install_script('post_install.sh')
+
