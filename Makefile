@@ -1,7 +1,7 @@
 # filepath: Makefile
 .PHONY: all update copy setup compile clean
 
-all: setup compile install
+all: cp-builds setup compile install
 
 cp-builds:
 	cp -r meson_build_files/* src/
