@@ -46,11 +46,23 @@ jobs:
       - name: build
         run: uv run make
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      # Package the adapters directory into a single .zip
+      - name: Package adapters (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          zip -r mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip adapters
+
+      - name: Package adapters (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Compress-Archive -Path adapters/* -DestinationPath mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip
+
+      # Upload the ZIP as a single-file artifact
+      - uses: actions/upload-artifact@v4
         with:
           name: mm-test-adapters-${{ runner.os }}-${{ runner.arch }}
-          path: adapters
+          path: mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip
 
   create-release:
     name: Create Release
@@ -59,6 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - name: Get current date
         id: date
@@ -67,7 +80,6 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
-          merge-multiple: false
 
       - name: Display structure of downloaded files
         run: ls -R artifacts/
@@ -75,7 +87,7 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*
+          files: artifacts/**/*.zip
           tag_name: ${{ steps.date.outputs.release_date }}
           name: Release ${{ steps.date.outputs.release_date }}
           draft: false
