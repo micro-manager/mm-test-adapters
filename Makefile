@@ -1,11 +1,23 @@
 # filepath: Makefile
 .PHONY: all update copy setup compile clean
 
+# use second to build and install the project
+
 all: cp-builds setup compile install
 
+# use first to update submodules and overwrite the meson_build_files
+
+submodule:
+	git submodule update --init --recursive --remote --merge --force
+	$(MAKE) cp-builds
+
 cp-builds:
-	cp -r meson_build_files/* src/
-	
+	@if [ "$(OS)" = "Windows_NT" ]; then \
+		powershell -Command "Copy-Item -Path meson_build_files/* -Destination src/ -Recurse -Force"; \
+	else \
+		cp -r meson_build_files/* src/ ; \
+	fi
+
 setup:
 	meson setup builddir --buildtype=release
 
@@ -15,15 +27,6 @@ compile:
 install:
 	meson install --tags runtime -C builddir
 	@if [ "$(OS)" != "Windows_NT" ]; then ./post_install.sh; fi
-
-submodule:
-	git submodule update --init --recursive
-	$(MAKE) cp-builds
-
-submodule-update:
-	git submodule foreach --recursive 'git reset --hard && git clean -fdx'
-	git submodule update --init --recursive --remote --force --checkout
-	$(MAKE) cp-builds
 
 clean:
 	rm -rf builddir

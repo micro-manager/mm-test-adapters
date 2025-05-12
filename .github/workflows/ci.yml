@@ -22,43 +22,32 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: true
-      - name: prep
-        shell: bash
-        run: |
-          cp -r meson_build_files/* src/
-
       - uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
 
       - uses: ilammy/msvc-dev-cmd@v1
         if: matrix.os == 'windows-latest'
         with:
           toolset: "14.29"
-
       - name: install boost
         if: matrix.os == 'windows-latest'
         run: choco install boost-msvc-14.2
 
       - name: build
-        run: uv run make
+        run: |
+          uv run make submodule
+          uv run make
 
       # Package the adapters directory into a single .zip
       - name: Package adapters (Unix)
         if: runner.os != 'Windows'
         run: |
           zip -r mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip adapters
-
       - name: Package adapters (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
           Compress-Archive -Path adapters/* -DestinationPath mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip
 
-      # Upload the ZIP as a single-file artifact
       - uses: actions/upload-artifact@v4
         with:
           name: mm-test-adapters-${{ runner.os }}-${{ runner.arch }}
