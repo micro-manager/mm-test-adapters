@@ -41,7 +41,8 @@ jobs:
       - name: Package adapters (Unix)
         if: runner.os != 'Windows'
         run: |
-          zip -r mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip adapters
+          cd adapters
+          zip -r ../mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip . 
       - name: Package adapters (Windows)
         if: runner.os == 'Windows'
         shell: powershell
