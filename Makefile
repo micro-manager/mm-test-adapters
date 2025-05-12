@@ -16,7 +16,7 @@ submodule-update:
 	$(MAKE) cp-builds
 
 setup:
-	meson setup builddir --reconfigure --prefix=$$PWD -Dlibdir=adapters --buildtype=release
+	meson setup builddir --buildtype=release
 
 compile:
 	meson compile -C builddir

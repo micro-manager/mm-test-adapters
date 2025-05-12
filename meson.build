@@ -5,7 +5,11 @@ project(
   'cpp',
   version : '11.5.0.73.0',
   meson_version : '>= 1.2.0',
-  default_options : ['cpp_std=c++14']
+  default_options : [
+    'cpp_std=c++14',
+    'prefix=' + meson.current_source_dir(),
+    'libdir=adapters',
+  ]
 )
 if host_machine.system() == 'darwin'
   add_project_arguments('-U_LIBCPP_ENABLE_ASSERTIONS', language: 'cpp')

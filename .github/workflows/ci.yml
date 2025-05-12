@@ -25,9 +25,15 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
+      - name: prep
+        shell: bash
+        run: |
+          cp -r meson_build_files/* src/
+
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
+
       - uses: ilammy/msvc-dev-cmd@v1
         if: matrix.os == 'windows-latest'
         with:
@@ -37,22 +43,8 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: choco install boost-msvc-14.2
 
-      - name: prep
-        shell: bash
-        run: |
-          cp -r meson_build_files/* src/
-
-      - name: build *nix
-        if: matrix.os != 'windows-latest'
-        run: |
-          uv run make
-          ls -la
-
-      - name: build windows
-        run: |
-          uv run meson setup builddir -Dlibdir=adapters --buildtype=release --prefix=%cd%
-          uv run meson compile -C builddir
-          uv run meson install -C builddir
+      - name: build
+        run: uv run make
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
