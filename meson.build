@@ -7,6 +7,9 @@ project(
   meson_version : '>= 1.2.0',
   default_options : ['cpp_std=c++14']
 )
+if host_machine.system() == 'darwin'
+  add_project_arguments('-U_LIBCPP_ENABLE_ASSERTIONS', language: 'cpp')
+endif
 
 subdir('src/mmCoreAndDevices/MMDevice')
 subdir('src/mmCoreAndDevices/MMCore')
@@ -14,7 +17,6 @@ subdir('src/mmCoreAndDevices/MMCore')
 mmdevice_dep = dependency('mmdevice_dep')
 msgpack_dep = dependency('msgpack-cxx', fallback: ['msgpack-cxx', 'msgpack_cxx_dep'])
 boost_dep = dependency('boost', modules: ['thread', 'system'], fallback: ['boost', 'boost_dep'], include_type: 'system')
-
 
 
 device_cpp_args = []
@@ -29,6 +31,7 @@ else
         '-Wno-unused-but-set-variable',
         '-Wno-reorder',
         '-Wno-unused-private-field',
+        '-Wno-return-type',
     ]
 endif
 if host_machine.system() == 'windows'
@@ -99,3 +102,11 @@ shared_library(
     dependencies: [mmdevice_dep, msgpack_dep, boost_dep],
     install: true,
 )
+
+
+# install MMConfig_demo.cfg into the install directory
+install_data(
+  'src/MMConfig_demo.cfg',
+  install_dir: get_option('libdir')
+)
+meson.add_install_script('post_install.sh')
