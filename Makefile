@@ -9,7 +9,7 @@ cp-builds:
 submodule-update:
 	git submodule foreach --recursive 'git reset --hard && git clean -fdx'
 	git submodule update --init --recursive --remote --force --checkout
-	cp-builds
+	$(MAKE) cp-builds
 
 setup:
 	meson setup builddir --reconfigure --prefix=$$PWD -Dlibdir=built-devices
