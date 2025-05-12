@@ -39,6 +39,8 @@ else
         '-Wno-unused-private-field',
         '-Wno-return-type',
     ]
+    # script to clean up extensions for *nix
+    # note, this won't run if you use `--tags runtime`
     meson.add_install_script('post_install.sh')
 endif
 

@@ -1,5 +1,9 @@
 #!/usr/bin/env sh
-ADAPTER_DIR="${DESTDIR}${MESON_INSTALL_PREFIX}/adapters"
+if [ -z "$MESON_INSTALL_PREFIX" ]; then
+    ADAPTER_DIR="${PWD}/adapters"
+else
+    ADAPTER_DIR="${DESTDIR}${MESON_INSTALL_PREFIX}/adapters"
+fi
 
 # remove the .dylib or .so extension from all files in the adapters directory
 # this is how the micro-manager plugin loader expects the files to be named

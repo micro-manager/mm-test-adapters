@@ -14,6 +14,7 @@ compile:
 
 install:
 	meson install --tags runtime -C builddir
+	@if [ "$(OS)" != "Windows_NT" ]; then ./post_install.sh; fi
 
 submodule:
 	git submodule update --init --recursive
