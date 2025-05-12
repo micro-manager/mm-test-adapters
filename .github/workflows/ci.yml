@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  build:
     name: build ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -37,14 +37,54 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: choco install boost-msvc-14.2
 
-      - name: install
+      - name: prep
         shell: bash
+        run: |
+          cp -r meson_build_files/* src/
+
+      - name: build *nix
+        if: matrix.os != 'windows-latest'
         run: |
           uv run make
           ls -la
-      
+
+      - name: build windows
+        run: |
+          uv run meson setup builddir -Dlibdir=adapters --buildtype=release --prefix=%cd%
+          uv run meson compile -C builddir
+          uv run meson install -C builddir
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: mm-test-adapters-${{ runner.os }}-${{ runner.arch }}
           path: adapters
+
+  create-release:
+    name: Create Release
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Get current date
+        id: date
+        run: echo "release_date=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: false
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts/
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          tag_name: ${{ steps.date.outputs.release_date }}
+          name: Release ${{ steps.date.outputs.release_date }}
+          draft: false
+          prerelease: false
