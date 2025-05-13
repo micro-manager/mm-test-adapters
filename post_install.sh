@@ -5,14 +5,21 @@ else
     ADAPTER_DIR="${DESTDIR}${MESON_INSTALL_PREFIX}/adapters"
 fi
 
-# remove the .dylib or .so extension from all files in the adapters directory
-# this is how the micro-manager plugin loader expects the files to be named
-# for every file in the adapters directory
+# fix library names based on what MMCore PluginManager.cpp is expecting
 for lib in "$ADAPTER_DIR"/*; do
-    # if it ends with .dylib or .so, remove the extension
-    if [[ "$lib" == *.dylib || "$lib" == *.so ]]; then
+
+    # if it ends with .dylib remove the extension
+    if [[ "$lib" == *.dylib ]]; then
         # remove the extension
         lib_name="${lib%.*}"
         mv "$lib" "$lib_name"
     fi
+
+    # if it ends with .so, make sure it ends in `.so.0`
+    if [[ "$lib" == *.so ]]; then
+        # remove the extension
+        lib_name="${lib%.*}"
+        mv "$lib" "$lib_name.so.0"
+    fi
+
 done
