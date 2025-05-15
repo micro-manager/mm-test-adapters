@@ -1,4 +1,6 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+echo "Running post_install.sh"
+
 if [ -z "$MESON_INSTALL_PREFIX" ]; then
     ADAPTER_DIR="${PWD}/adapters"
 else
