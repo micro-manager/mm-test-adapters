@@ -42,7 +42,7 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           cd adapters
-          zip -r ../mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip . 
+          zip -r ../mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip .
       - name: Package adapters (Windows)
         if: runner.os == 'Windows'
         shell: powershell
@@ -57,7 +57,7 @@ jobs:
   create-release:
     name: Create Release
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name != 'pull_request') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
