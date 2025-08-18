@@ -67,21 +67,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          submodules: 'recursive'
+          submodules: "recursive"
           fetch-depth: 0
+
+      # update submodules
+      - run: git submodule update --init --recursive --remote --merge --force
 
       - name: Compute release tag
         id: tag
         run: |
           # Extract device interface version from header
           device_ver=$(awk '/#define DEVICE_INTERFACE_VERSION/ {print $3; exit}' src/mmCoreAndDevices/MMDevice/MMDevice.h)
-          
           # Get the sha of the submodule
           sub_sha=$(git -C src/mmCoreAndDevices rev-parse HEAD)
-
           # Use first 8 chars
           short=${sub_sha:0:8}
-
           release_tag="${device_ver}.${short}"
           echo "release_tag=$release_tag" >> $GITHUB_OUTPUT
 
