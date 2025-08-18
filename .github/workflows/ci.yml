@@ -22,7 +22,7 @@ jobs:
         os: [windows-latest, ubuntu-latest, macos-latest, macos-13]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
 
       - uses: ilammy/msvc-dev-cmd@v1
@@ -64,9 +64,26 @@ jobs:
       contents: write
 
     steps:
-      - name: Get current date
-        id: date
-        run: echo "release_date=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+
+      - name: Compute release tag
+        id: tag
+        run: |
+          # Extract device interface version from header
+          device_ver=$(awk '/#define DEVICE_INTERFACE_VERSION/ {print $3; exit}' src/mmCoreAndDevices/MMDevice/MMDevice.h)
+          
+          # Get the sha of the submodule
+          sub_sha=$(git -C src/mmCoreAndDevices rev-parse HEAD)
+
+          # Use first 8 chars
+          short=${sub_sha:0:8}
+
+          release_tag="${device_ver}.${short}"
+          echo "release_tag=$release_tag" >> $GITHUB_OUTPUT
 
       - uses: actions/download-artifact@v4
         with:
@@ -79,7 +96,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: artifacts/**/*.zip
-          tag_name: ${{ steps.date.outputs.release_date }}
-          name: Release ${{ steps.date.outputs.release_date }}
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          name: Release ${{ steps.tag.outputs.release_tag }}
           draft: false
           prerelease: false
