@@ -6,6 +6,11 @@ on:
     tags: [v*]
   pull_request:
   workflow_dispatch:
+    inputs:
+      submodule_sha:
+        description: 'Specific SHA for mmCoreAndDevices submodule (optional)'
+        required: false
+        type: string
   repository_dispatch:
 
 concurrency:
@@ -23,7 +28,26 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: recursive
       - uses: astral-sh/setup-uv@v6
+
+      - name: Update submodule to specific SHA or latest
+        run: |
+          # Get the SHA from workflow_dispatch input or repository_dispatch payload
+          SUBMODULE_SHA="${{ inputs.submodule_sha || github.event.client_payload.submodule_sha }}"
+          
+          if [ -n "$SUBMODULE_SHA" ]; then
+            echo "Updating submodule to specific SHA: $SUBMODULE_SHA"
+            cd src/mmCoreAndDevices
+            git fetch origin
+            git checkout $SUBMODULE_SHA
+            cd ../..
+            uv run make cp-builds
+          else
+            echo "Updating submodule to latest"
+            uv run make submodule
+          fi
 
       - uses: ilammy/msvc-dev-cmd@v1
         if: matrix.os == 'windows-latest'
@@ -34,9 +58,7 @@ jobs:
         run: choco install boost-msvc-14.2
 
       - name: build
-        run: |
-          uv run make submodule
-          uv run make
+        run: uv run make
 
       # Package the adapters directory into a single .zip
       - name: Package adapters (Unix)
@@ -70,8 +92,20 @@ jobs:
           submodules: "recursive"
           fetch-depth: 0
 
-      # update submodules
-      - run: git submodule update --init --recursive --remote --merge --force
+      - name: Update submodule to specific SHA or latest
+        run: |
+          # Get the SHA from workflow_dispatch input or repository_dispatch payload
+          SUBMODULE_SHA="${{ inputs.submodule_sha || github.event.client_payload.submodule_sha }}"
+          
+          if [ -n "$SUBMODULE_SHA" ]; then
+            echo "Updating submodule to specific SHA: $SUBMODULE_SHA"
+            cd src/mmCoreAndDevices
+            git fetch origin
+            git checkout $SUBMODULE_SHA
+          else
+            echo "Updating submodule to latest"
+            git submodule update --init --recursive --remote --merge --force
+          fi
 
       - name: Compute release tag
         id: tag
@@ -97,6 +131,6 @@ jobs:
         with:
           files: artifacts/**/*.zip
           tag_name: ${{ steps.tag.outputs.release_tag }}
-          name: Release ${{ steps.tag.outputs.release_tag }}
+          name: ${{ steps.tag.outputs.release_name }}
           draft: false
           prerelease: false
