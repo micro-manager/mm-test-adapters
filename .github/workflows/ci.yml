@@ -30,6 +30,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           submodules: recursive
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@v6
 
       - name: Update submodule to specific SHA or latest
@@ -40,10 +41,8 @@ jobs:
           
           if [ -n "$SUBMODULE_SHA" ]; then
             echo "Updating submodule to specific SHA: $SUBMODULE_SHA"
-            cd src/mmCoreAndDevices
-            git fetch origin
-            git checkout $SUBMODULE_SHA
-            cd ../..
+            git fetch --all
+            git -C src/mmCoreAndDevices checkout $SUBMODULE_SHA
             uv run make cp-builds
           else
             echo "Updating submodule to latest"
@@ -100,9 +99,8 @@ jobs:
           
           if [ -n "$SUBMODULE_SHA" ]; then
             echo "Updating submodule to specific SHA: $SUBMODULE_SHA"
-            cd src/mmCoreAndDevices
-            git fetch origin
-            git checkout $SUBMODULE_SHA
+            git fetch --all
+            git -C src/mmCoreAndDevices checkout $SUBMODULE_SHA
           else
             echo "Updating submodule to latest"
             git submodule update --init --recursive --remote --merge --force
