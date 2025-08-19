@@ -33,6 +33,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
 
       - name: Update submodule to specific SHA or latest
+        shell: bash
         run: |
           # Get the SHA from workflow_dispatch input or repository_dispatch payload
           SUBMODULE_SHA="${{ inputs.submodule_sha || github.event.client_payload.submodule_sha }}"
