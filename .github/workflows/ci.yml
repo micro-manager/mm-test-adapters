@@ -19,12 +19,16 @@ concurrency:
 
 jobs:
   test:
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest, macos-13]
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
-      - name: Run tests
-        run: uv run --no-editable --force-reinstall pytest -v
+      - run: uv run fetch.py --build
+      - run: uv run pytest -v
 
   build:
     name: build ${{ matrix.os }}
