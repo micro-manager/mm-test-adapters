@@ -18,3 +18,6 @@ dev = [
     { include-group = "build" },
     { include-group = "test" },
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
