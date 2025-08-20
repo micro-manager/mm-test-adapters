@@ -81,6 +81,7 @@ def build_libs(libdir: str = DEFAULT_LIBDIR):
             "meson",
             "setup",
             "builddir",
+            "--vsenv",
             "--buildtype=release",
             "-Dmmdevice:tests=disabled",
             f"--libdir={libdir}",
