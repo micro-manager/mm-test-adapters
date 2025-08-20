@@ -9,11 +9,12 @@ requires-python = ">=3.11"
 dependencies = []
 
 [dependency-groups]
+build = ["meson>=0.18.0", "ninja>=1.11.1.4"]
+test = ["pytest"]
 dev = [
     "ipython>=9.2.0",
-    "meson>=0.18.0",
-    "ninja>=1.11.1.4",
     "rich>=14.0.0",
     "ruff>=0.11.9",
-    "pytest",
+    { include-group = "build" },
+    { include-group = "test" },
 ]
