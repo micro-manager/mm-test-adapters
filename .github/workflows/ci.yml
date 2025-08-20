@@ -41,7 +41,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          submodules: recursive
           fetch-depth: 0
       - uses: astral-sh/setup-uv@v6
 
@@ -85,7 +84,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          submodules: "recursive"
           fetch-depth: 0
       - uses: astral-sh/setup-uv@v6
       - name: Compute release tag
