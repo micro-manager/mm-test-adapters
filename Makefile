@@ -39,3 +39,4 @@ clean:
 	rm -rf builddir adapters src/mmCoreAndDevices
 	rm -rf dist build builddir *.egg-info src/*.egg-info
 	rm -f src/mm_test_adapters/_version.py
+	rm -rf src/mm_test_adapters/libs
