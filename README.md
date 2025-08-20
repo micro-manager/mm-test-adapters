@@ -8,6 +8,22 @@ development of mmCoreAndDevices (micro-manager).
 - SequenceTester
 - NotificationTester
 
+It makes these builds available in two places:
+
+1. Via GitHub releases: <https://github.com/micro-manager/mm-test-adapters/releases>  
+
+   These releases include just the shared libraries for these adapters.
+
+1. Via a PyPI package:
+
+   ```sh
+   pip install mm-test-adapters
+   ```
+
+   This package includes the shared libraries, and a single public method,
+   `mm_test_adapters.device_adapter_path`, which returns a path to the device
+   adapters folder.
+
 ## Build
 
 ```sh

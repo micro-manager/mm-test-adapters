@@ -13,6 +13,10 @@ DIV_RE = re.compile(r"#define DEVICE_INTERFACE_VERSION (\d+)")
 
 
 def get_version(dest: str = DEFAULT_DEST) -> str:
+    """Return version string, given a path to the mmCoreAndDevices folder.
+
+    The version string is: DIV.YYYYMMDD.dev+g<short_sha>
+    """
     if not (Path(dest) / "MMDevice" / "MMDevice.h").exists():
         raise FileNotFoundError(
             f"Sources not found in {dest}. "
@@ -22,14 +26,10 @@ def get_version(dest: str = DEFAULT_DEST) -> str:
     assert match, "Could not find DEVICE_INTERFACE_VERSION in MMDevice.h"
     real_sha = subprocess.check_output(["git", "-C", dest, "rev-parse", "HEAD"])
     short_sha = real_sha.decode("utf-8").strip()[:7]
-    date = (
-        subprocess.check_output(
-            ["git", "-C", dest, "log", "-1", "--format=%cd", "--date=format:'%Y%m%d'"]
-        )
-        .decode("utf-8")
-        .strip()
-        .replace("'", "")
+    _date = subprocess.check_output(
+        ["git", "-C", dest, "log", "-1", "--format=%cd", "--date=format:'%Y%m%d'"]
     )
+    date = _date.decode("utf-8").strip().replace("'", "")
     return f"{match.group(1)}.{date}.dev+g{short_sha}"
 
 
@@ -58,6 +58,7 @@ def fetch_sources(
     devices: Sequence[str] = DEFAULT_DEVICES,
     dest: str = DEFAULT_DEST,
 ) -> str:
+    """Clone `repo` into `dest`, checkout `sha`, and sparse-checkout `devices`."""
     if not os.path.exists(dest):
         subprocess.run(
             ["git", "clone", "--filter=blob:none", "--sparse", repo, dest],
@@ -75,7 +76,13 @@ def fetch_sources(
     return get_version(dest)
 
 
-def build_libs(libdir: str = DEFAULT_LIBDIR):
+def build_libs(libdir: str = DEFAULT_LIBDIR) -> None:
+    """Compile and install libraries into `libdir`.
+
+    This runs the meson.build file in the root directory.  (NOTE: that file
+    assumes that sources live in `src/mmCoreAndDevices`... so won't work if
+    `fetch_sources` was used without `dest=src/mmCoreAndDevices`.
+    """
     subprocess.check_call(
         [
             "meson",
@@ -101,7 +108,7 @@ def main(
     build: bool = False,
     clean: bool = False,
     libdir: str = DEFAULT_LIBDIR,
-):
+) -> str:
     fetch_sources(repo, sha, devices, dest)
     version = get_version(dest)
     if build:

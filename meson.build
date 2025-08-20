@@ -1,7 +1,7 @@
 project(
   'mmcore-test-devices',
   'cpp',
-  version: '11.5.0.73.0',
+  version: '0.1.0',
   meson_version: '>= 1.2.0',
   default_options: [
     'cpp_std=c++14',
