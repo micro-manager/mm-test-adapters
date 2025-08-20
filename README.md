@@ -22,7 +22,7 @@ uv run make
 
 ## Usage on CI
 
-To use these on CI see https://github.com/pymmcore-plus/setup-mm-test-adapters
+To use these on CI see <https://github.com/pymmcore-plus/setup-mm-test-adapters>
 
 ```yaml
 - name: Install MM test adapters
@@ -40,7 +40,6 @@ then place it wherever Micro-Manager is looking for device adapters.  To have th
 place them in the default [pymmcore-plus](https://github.com/pymmcore-plus/pymmcore-plus) install location,
 named `Micro-Manager-YYYYMMDD`
 
-
 - **Windows**: `$LOCALAPPDATA/pymmcore-plus/pymmcore-plus/mm/Micro-Manager-YYYYMMDD`
 - **macOS**: `$HOME/Library/Application Support/pymmcore-plus/mm/Micro-Manager-YYYYMMDD`
 - **Linux**: `$HOME/.local/share/pymmcore-plus/mm/Micro-Manager-YYYYMMDD`
@@ -51,4 +50,4 @@ named `Micro-Manager-YYYYMMDD`
 > ```sh
 > xattr -r -d com.apple.quarantine ~/Library/Application\ Support/pymmcore-plus/mm/Micro-Manager-*
 > ```
-> 
+>

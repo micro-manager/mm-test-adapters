@@ -42,7 +42,7 @@ jobs:
           if [ -n "$SUBMODULE_SHA" ]; then
             echo "Updating submodule to specific SHA: $SUBMODULE_SHA"
             git fetch --all
-            git -C src/mmCoreAndDevices checkout $SUBMODULE_SHA
+            git -C mmCoreAndDevices checkout $SUBMODULE_SHA
             uv run make cp-builds
           else
             echo "Updating submodule to latest"
@@ -100,7 +100,7 @@ jobs:
           if [ -n "$SUBMODULE_SHA" ]; then
             echo "Updating submodule to specific SHA: $SUBMODULE_SHA"
             git fetch --all
-            git -C src/mmCoreAndDevices checkout $SUBMODULE_SHA
+            git -C mmCoreAndDevices checkout $SUBMODULE_SHA
           else
             echo "Updating submodule to latest"
             git submodule update --init --recursive --remote --merge --force
@@ -110,9 +110,9 @@ jobs:
         id: tag
         run: |
           # Extract device interface version from header
-          device_ver=$(awk '/#define DEVICE_INTERFACE_VERSION/ {print $3; exit}' src/mmCoreAndDevices/MMDevice/MMDevice.h)
+          device_ver=$(awk '/#define DEVICE_INTERFACE_VERSION/ {print $3; exit}' mmCoreAndDevices/MMDevice/MMDevice.h)
           # Get the sha of the submodule
-          sub_sha=$(git -C src/mmCoreAndDevices rev-parse HEAD)
+          sub_sha=$(git -C mmCoreAndDevices rev-parse HEAD)
           # Use first 8 chars
           short=${sub_sha:0:8}
           release_tag="${device_ver}.${short}"

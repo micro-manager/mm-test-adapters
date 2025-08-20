@@ -1,0 +1,9 @@
+include meson.build
+include fetch.py
+include src/MMConfig_demo.cfg
+
+recursive-include subprojects/ *.wrap
+recursive-include src/mmCoreAndDevices/DeviceAdapters *
+recursive-include src/mmCoreAndDevices/MMDevice *
+
+exclude subprojects/**/catch2.wrap

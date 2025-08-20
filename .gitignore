@@ -16,3 +16,7 @@ __pycache__
 coverage/
 coverage*
 adapters
+catch2.wrap
+uv.lock
+src/mm_test_adapters/_version.py
+*.egg-info/
