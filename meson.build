@@ -10,11 +10,16 @@ project(
 )
 is_windows = host_machine.system() == 'windows'
 is_darwin = host_machine.system() == 'darwin'
+cxx = meson.get_compiler('cpp')
 
 if is_darwin
   add_project_arguments('-U_LIBCPP_ENABLE_ASSERTIONS', language: 'cpp')
 endif
+if cxx.get_id() in ['msvc', 'clang-cl']
+  add_project_arguments('-DNOMINMAX', language: 'cpp')
+endif
 
+winmm_lib = cxx.find_library('Winmm', required: false)
 mmdevice_dep = dependency('mmdevice')
 msgpack_dep = dependency('msgpack-cxx', fallback: ['msgpack-cxx', 'msgpack_cxx_dep'])
 boost_dep = dependency(
@@ -46,7 +51,7 @@ shared_library(
   'mmgr_dal_DemoCamera',
   ['src/mmCoreAndDevices/DeviceAdapters/DemoCamera/DemoCamera.cpp'],
   cpp_args: device_cpp_args,
-  dependencies: [mmdevice_dep],
+  dependencies: [mmdevice_dep, winmm_lib],
   install: true,
 )
 
