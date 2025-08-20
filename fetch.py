@@ -59,11 +59,12 @@ def fetch_sources(
     dest: str = DEFAULT_DEST,
 ) -> str:
     if not os.path.exists(dest):
-        subprocess.check_call(
-            ["git", "clone", "--filter=blob:none", "--sparse", repo, dest]
+        subprocess.run(
+            ["git", "clone", "--filter=blob:none", "--sparse", repo, dest],
+            capture_output=True,
         )
     try:
-        subprocess.check_call(["git", "-C", dest, "checkout", sha])
+        subprocess.run(["git", "-C", dest, "checkout", sha], capture_output=True)
     except subprocess.CalledProcessError:
         print(f"Failed to checkout SHA {sha!r}")
     subprocess.check_call(["git", "-C", dest, "sparse-checkout", "init", "--no-cone"])
@@ -83,6 +84,7 @@ def build_libs(libdir: str = DEFAULT_LIBDIR):
             "--buildtype=release",
             "-Dmmdevice:tests=disabled",
             f"--libdir={libdir}",
+            f"--bindir={libdir}",  # to also install the mmconfig_demo.cfg
         ]
     )
     subprocess.run(["meson", "compile", "-C", "builddir"])
@@ -131,4 +133,4 @@ if __name__ == "__main__":
         libdir=args.libdir,
     )
 
-    print(f">> VERSION: {version}")
+    print(version)

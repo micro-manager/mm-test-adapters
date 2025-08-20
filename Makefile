@@ -3,20 +3,7 @@
 
 # use second to build and install the project
 
-all: cp-builds setup compile install
-
-# use first to update submodules and overwrite the meson_build_files
-
-submodule:
-	git submodule update --init --recursive --remote --merge --force
-	$(MAKE) cp-builds
-
-cp-builds:
-	@if [ "$(OS)" = "Windows_NT" ]; then \
-		powershell -Command "Copy-Item -Path meson_build_files/* -Destination src/ -Recurse -Force"; \
-	else \
-		cp -r meson_build_files/* src/ ; \
-	fi
+all: setup compile install
 
 setup:
 	meson setup builddir --buildtype=release
