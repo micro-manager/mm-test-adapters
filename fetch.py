@@ -65,9 +65,12 @@ def fetch_sources(
             capture_output=True,
         )
     try:
-        subprocess.run(["git", "-C", dest, "checkout", sha], capture_output=True)
+        subprocess.run(
+            ["git", "-C", dest, "checkout", sha], check=True, capture_output=True
+        )
     except subprocess.CalledProcessError:
-        print(f"Failed to checkout SHA {sha!r}")
+        raise ValueError(f"Failed to checkout SHA {sha!r}")
+
     subprocess.check_call(["git", "-C", dest, "sparse-checkout", "init", "--no-cone"])
     subprocess.check_call(
         ["git", "-C", dest, "sparse-checkout", "set", "/MMDevice/MMDevice.h"]
