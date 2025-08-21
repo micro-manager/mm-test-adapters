@@ -29,15 +29,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
-
-      - uses: ilammy/msvc-dev-cmd@v1
-        if: matrix.os == 'windows-latest'
-        with:
-          toolset: "14.29"
-      - name: install boost
-        if: matrix.os == 'windows-latest'
-        run: choco install boost-msvc-14.2
-
       - name: build
         run: uv run --no-dev --group build fetch.py --build
 
