@@ -3,10 +3,7 @@ project(
   'cpp',
   version: '0.1.0',
   meson_version: '>= 1.2.0',
-  default_options: [
-    'cpp_std=c++14',
-    'prefix=' + meson.current_source_dir()
-  ],
+  default_options: ['cpp_std=c++14', 'prefix=' + meson.current_source_dir()],
 )
 is_windows = host_machine.system() == 'windows'
 is_darwin = host_machine.system() == 'darwin'
@@ -22,12 +19,7 @@ endif
 winmm_lib = cxx.find_library('Winmm', required: false)
 mmdevice_dep = dependency('mmdevice')
 msgpack_dep = dependency('msgpack-cxx', fallback: ['msgpack-cxx', 'msgpack_cxx_dep'])
-boost_dep = dependency(
-  'boost',
-  modules: ['thread', 'system'],
-  fallback: ['boost', 'boost_dep'],
-  include_type: 'system',
-)
+boost_dep = dependency('boost', modules: ['thread', 'system'], include_type: 'system')
 
 if is_windows
   device_cpp_args = [
