@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       submodule_sha:
-        description: 'Specific SHA for mmCoreAndDevices submodule (optional)'
+        description: "Specific SHA for mmCoreAndDevices submodule (optional)"
         required: false
         type: string
   repository_dispatch:
@@ -28,26 +28,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-        with:
-          submodules: recursive
-          fetch-depth: 0
       - uses: astral-sh/setup-uv@v6
-
-      - name: Update submodule to specific SHA or latest
-        shell: bash
-        run: |
-          # Get the SHA from workflow_dispatch input or repository_dispatch payload
-          SUBMODULE_SHA="${{ inputs.submodule_sha || github.event.client_payload.submodule_sha }}"
-          
-          if [ -n "$SUBMODULE_SHA" ]; then
-            echo "Updating submodule to specific SHA: $SUBMODULE_SHA"
-            git fetch --all
-            git -C src/mmCoreAndDevices checkout $SUBMODULE_SHA
-            uv run make cp-builds
-          else
-            echo "Updating submodule to latest"
-            uv run make submodule
-          fi
 
       - uses: ilammy/msvc-dev-cmd@v1
         if: matrix.os == 'windows-latest'
@@ -58,26 +39,28 @@ jobs:
         run: choco install boost-msvc-14.2
 
       - name: build
-        run: uv run make
+        run: uv run --no-dev --group build fetch.py --build
+
+      - run: uv run pytest -v
 
       # Package the adapters directory into a single .zip
       - name: Package adapters (Unix)
         if: runner.os != 'Windows'
         run: |
-          cd adapters
-          zip -r ../mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip .
+          cd src/mm_test_adapters/libs
+          zip -r ../../../mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip .
       - name: Package adapters (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          Compress-Archive -Path adapters/* -DestinationPath mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip
+          Compress-Archive -Path src/mm_test_adapters/libs/* -DestinationPath mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip
 
       - uses: actions/upload-artifact@v4
         with:
           name: mm-test-adapters-${{ runner.os }}-${{ runner.arch }}
           path: mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip
 
-  create-release:
+  create-github-release:
     name: Create Release
     needs: build
     if: github.event_name != 'pull_request'
@@ -89,34 +72,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          submodules: "recursive"
           fetch-depth: 0
-
-      - name: Update submodule to specific SHA or latest
-        run: |
-          # Get the SHA from workflow_dispatch input or repository_dispatch payload
-          SUBMODULE_SHA="${{ inputs.submodule_sha || github.event.client_payload.submodule_sha }}"
-          
-          if [ -n "$SUBMODULE_SHA" ]; then
-            echo "Updating submodule to specific SHA: $SUBMODULE_SHA"
-            git fetch --all
-            git -C src/mmCoreAndDevices checkout $SUBMODULE_SHA
-          else
-            echo "Updating submodule to latest"
-            git submodule update --init --recursive --remote --merge --force
-          fi
-
+      - uses: astral-sh/setup-uv@v6
       - name: Compute release tag
         id: tag
         run: |
-          # Extract device interface version from header
-          device_ver=$(awk '/#define DEVICE_INTERFACE_VERSION/ {print $3; exit}' src/mmCoreAndDevices/MMDevice/MMDevice.h)
-          # Get the sha of the submodule
-          sub_sha=$(git -C src/mmCoreAndDevices rev-parse HEAD)
-          # Use first 8 chars
-          short=${sub_sha:0:8}
-          release_tag="${device_ver}.${short}"
-          echo "release_tag=$release_tag" >> $GITHUB_OUTPUT
+          release_tag=$(uv run fetch.py)
+          echo "release_tag=$release_tag" >> $GITHUB_OUTPUT 
 
       - uses: actions/download-artifact@v4
         with:
@@ -133,3 +95,17 @@ jobs:
           name: ${{ steps.tag.outputs.release_name }}
           draft: false
           prerelease: false
+
+  create-pypi-release:
+    name: Deploy
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv build
+      - name: 🚢 Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

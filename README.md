@@ -8,38 +8,78 @@ development of mmCoreAndDevices (micro-manager).
 - SequenceTester
 - NotificationTester
 
+It makes these builds available in two places:
+
+1. Via GitHub releases: <https://github.com/micro-manager/mm-test-adapters/releases>  
+
+   These releases include just the shared libraries for these adapters.
+
+1. Via a PyPI package:
+
+   ```sh
+   pip install mm-test-adapters
+   ```
+
+   This package includes the shared libraries, and a single public method,
+   `mm_test_adapters.device_adapter_path`, which returns a path to the device
+   adapters folder.
+
 ## Build
 
-```sh
-# update submodules, and apply meson-build patches
-uv run make submodule
+To build these locally, you should first have system boost installed:
 
-# build
-uv run make
+```sh
+# macos
+brew install boost
+# ubuntu
+sudo apt-get install libboost-all-dev
+# windows
+choco install boost-msvc-14.2
+```
+
+```sh
+uv sync --no-editable
+# or
+uv run fetch.py --build
+```
+
+### Cleanup
+
+If you want to remove all external sources and build files:
+
+```sh
+make clean
 ```
 
 > note, the makefile also works on Windows if you have git for windows.
 
 ## Usage on CI
 
-To use these on CI see https://github.com/pymmcore-plus/setup-mm-test-adapters
+To use these on CI see <https://github.com/pymmcore-plus/setup-mm-test-adapters>
 
 ```yaml
 - name: Install MM test adapters
   uses: pymmcore-plus/setup-mm-test-adapters@main
   with:
     # all inputs are optional
-    version: latest  # or a specific YYYYMMDD version
+    # version should look like:
+    #   literal string 'latest'
+    #   DIV -> version: 74
+    #   DIV.YYYYMMDD -> version: 74.202508
+    version: latest
     destination: ./mm-test-adapters
 ```
 
 ## Usage locally
 
-[Download the release](https://github.com/pymmcore-plus/mm-test-adapters/releases/) you would like to use,
-then place it wherever Micro-Manager is looking for device adapters.  To have them found by pymmcore-plus,
-place them in the default [pymmcore-plus](https://github.com/pymmcore-plus/pymmcore-plus) install location,
-named `Micro-Manager-YYYYMMDD`
+[Download the
+release](https://github.com/pymmcore-plus/mm-test-adapters/releases/) you would
+like to use, then place it wherever Micro-Manager is looking for device
+adapters.
 
+To have them found by pymmcore-plus, place them in the default
+[pymmcore-plus](https://github.com/pymmcore-plus/pymmcore-plus) install
+location, named `Micro-Manager-YYYYMMDD`
 
 - **Windows**: `$LOCALAPPDATA/pymmcore-plus/pymmcore-plus/mm/Micro-Manager-YYYYMMDD`
 - **macOS**: `$HOME/Library/Application Support/pymmcore-plus/mm/Micro-Manager-YYYYMMDD`
@@ -51,4 +91,4 @@ named `Micro-Manager-YYYYMMDD`
 > ```sh
 > xattr -r -d com.apple.quarantine ~/Library/Application\ Support/pymmcore-plus/mm/Micro-Manager-*
 > ```
-> 
+>
