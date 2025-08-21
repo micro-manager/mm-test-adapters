@@ -18,21 +18,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest, macos-13]
-    steps:
-      - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v6
-      - name: install boost
-        if: matrix.os == 'windows-latest'
-        run: choco install boost-msvc-14.2
-      - run: uv run --no-dev --group build fetch.py --build
-      - run: uv run pytest -v
-
   build:
     name: build ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -43,8 +28,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
       - uses: astral-sh/setup-uv@v6
 
       - uses: ilammy/msvc-dev-cmd@v1
@@ -56,19 +39,21 @@ jobs:
         run: choco install boost-msvc-14.2
 
       - name: build
-        run: uv run fetch.py --build --libdir adapters
+        run: uv run --no-dev --group build fetch.py --build
+
+      - run: uv run pytest -v
 
       # Package the adapters directory into a single .zip
       - name: Package adapters (Unix)
         if: runner.os != 'Windows'
         run: |
-          cd adapters
-          zip -r ../mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip .
+          cd src/mm_test_adapters/libs
+          zip -r ../../../mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip .
       - name: Package adapters (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          Compress-Archive -Path adapters/* -DestinationPath mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip
+          Compress-Archive -Path src/mm_test_adapters/libs/* -DestinationPath mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip
 
       - uses: actions/upload-artifact@v4
         with:
