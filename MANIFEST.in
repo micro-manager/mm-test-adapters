@@ -3,7 +3,10 @@ include fetch.py
 include src/MMConfig_demo.cfg
 
 recursive-include subprojects/ *.wrap
+exclude subprojects/**/catch2.wrap
+
 recursive-include src/mmCoreAndDevices/DeviceAdapters *
 recursive-include src/mmCoreAndDevices/MMDevice *
+recursive-include subprojects *
 
-exclude subprojects/**/catch2.wrap
+

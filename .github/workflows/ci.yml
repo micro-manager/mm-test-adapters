@@ -91,7 +91,7 @@ jobs:
   create-pypi-release:
     name: Deploy
     needs: build
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
