@@ -11,11 +11,12 @@ from setuptools.dist import Distribution
 sys.path.append(".")
 import fetch
 
+MM_SHA = os.environ.get("MM_SHA", "main").lower()
 VERSION_FILE = Path("src/mm_test_adapters/_version.py")
 
 
 def write_version() -> str:
-    version = fetch.fetch_sources()
+    version = fetch.fetch_sources(sha=MM_SHA)
     VERSION_FILE.write_text(f'__version__ = "{version}"\n')
     return version
 

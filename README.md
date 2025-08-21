@@ -24,7 +24,7 @@ It makes these builds available in two places:
    `mm_test_adapters.device_adapter_path`, which returns a path to the device
    adapters folder.
 
-## Build
+## Build Adapters
 
 To build these locally, you should first have system boost installed:
 
@@ -43,6 +43,17 @@ uv sync --no-editable
 uv run fetch.py --build
 ```
 
+## Build Python Package
+
+To build an sdist and wheel, run:
+
+```sh
+uv build
+```
+
+You may optionally set the env var `MM_SHA` to build a specific commit
+of mmCoreAndDevices.
+
 ### Cleanup
 
 If you want to remove all external sources and build files:
@@ -53,7 +64,7 @@ make clean
 
 > note, the makefile also works on Windows if you have git for windows.
 
-## Usage on CI
+## Using Releases on CI
 
 To use these on CI see <https://github.com/pymmcore-plus/setup-mm-test-adapters>
 
@@ -70,7 +81,7 @@ To use these on CI see <https://github.com/pymmcore-plus/setup-mm-test-adapters>
     destination: ./mm-test-adapters
 ```
 
-## Usage locally
+## Using Releases Locally
 
 [Download the
 release](https://github.com/pymmcore-plus/mm-test-adapters/releases/) you would
