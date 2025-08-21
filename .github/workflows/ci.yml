@@ -60,7 +60,7 @@ jobs:
           name: mm-test-adapters-${{ runner.os }}-${{ runner.arch }}
           path: mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip
 
-  create-release:
+  create-github-release:
     name: Create Release
     needs: build
     if: github.event_name != 'pull_request'
@@ -78,7 +78,7 @@ jobs:
         id: tag
         run: |
           release_tag=$(uv run fetch.py)
-          echo "release_tag=$release_tag" >> $GITHUB_OUTPUT
+          echo "release_tag=$release_tag" >> $GITHUB_OUTPUT 
 
       - uses: actions/download-artifact@v4
         with:
@@ -95,3 +95,20 @@ jobs:
           name: ${{ steps.tag.outputs.release_name }}
           draft: false
           prerelease: false
+
+  create-pypi-release:
+    name: Deploy
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv build
+      - name: 🚢 Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
