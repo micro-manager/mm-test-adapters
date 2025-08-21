@@ -2,11 +2,9 @@ include meson.build
 include fetch.py
 include src/MMConfig_demo.cfg
 
-recursive-include subprojects/ *.wrap
-exclude subprojects/**/catch2.wrap
-
 recursive-include src/mmCoreAndDevices/DeviceAdapters *
 recursive-include src/mmCoreAndDevices/MMDevice *
-recursive-include subprojects *
+recursive-include subprojects/ *.wrap
+recursive-include subprojects/packagefiles *
 
-
+exclude subprojects/**/catch2.wrap
