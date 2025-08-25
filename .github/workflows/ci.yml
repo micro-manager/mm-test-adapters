@@ -84,30 +84,6 @@ jobs:
           name: cibw-wheels-${{ runner.os }}-${{ runner.arch }}
           path: ./wheelhouse/*.whl
 
-  publish-to-pypi:
-    name: Publish to PyPI
-    needs: [build-sdist, build-wheels]
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: write
-    steps:
-      - name: Get sdist
-        uses: actions/download-artifact@v5
-        with:
-          name: Packages
-          path: dist
-      - name: Get wheels
-        uses: actions/download-artifact@v5
-        with:
-          pattern: cibw-wheels-*
-          path: dist
-          merge-multiple: true
-
-      - name: 🚢 Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-
   create-github-release:
     name: Create Release
     needs: build
@@ -143,3 +119,30 @@ jobs:
           name: ${{ steps.tag.outputs.release_name }}
           draft: false
           prerelease: false
+
+  publish-to-pypi:
+    name: Publish to PyPI
+    # we put needs build here to ensure it happens after create-github release
+    # it's for the (hacky) reason that `fetch.get_version` hits pypi to check the latest version
+    # and we don't want the github version to be affected by this (upcoming) release
+    needs: [build, build-sdist, build-wheels]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Get sdist
+        uses: actions/download-artifact@v5
+        with:
+          name: Packages
+          path: dist
+      - name: Get wheels
+        uses: actions/download-artifact@v5
+        with:
+          pattern: cibw-wheels-*
+          path: dist
+          merge-multiple: true
+
+      - name: 🚢 Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
