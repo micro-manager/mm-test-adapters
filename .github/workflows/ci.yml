@@ -71,7 +71,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
     steps:
-      - uses: actions/checkout@5
+      - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
       - name: Build wheels via cibuildwheel
         uses: pypa/cibuildwheel@v3.1
