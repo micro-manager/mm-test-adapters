@@ -19,6 +19,7 @@ adapters
 catch2.wrap
 uv.lock
 src/mm_test_adapters/_version.py
+src/mm_test_adapters/version.py
 src/mm_test_adapters/libs/*
 src/mmCoreAndDevices
 *.egg-info/

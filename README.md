@@ -24,6 +24,16 @@ It makes these builds available in two places:
    `mm_test_adapters.device_adapter_path`, which returns a path to the device
    adapters folder.
 
+## Using PyPI Package
+
+```python
+import pymmcore  # or pymmcore_plus
+from mm_test_adapters import device_adapter_path
+
+core = pymmcore.CMMCore()
+core.setDeviceAdapterSearchPaths([device_adapter_path()])
+```
+
 ## Build Adapters
 
 To build these locally, you should first have system boost installed:
