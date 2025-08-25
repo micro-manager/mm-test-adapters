@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel", "meson", "ninja"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mm-build-test-devices"
+name = "mm-test-adapters"
 dynamic = ["version"]
 requires-python = ">=3.11"
 readme = "README.md"
