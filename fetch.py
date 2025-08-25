@@ -1,7 +1,9 @@
+import json
 import os
 import re
 import shutil
 import subprocess
+import urllib.request
 from pathlib import Path
 from typing import Sequence
 
@@ -15,7 +17,8 @@ DIV_RE = re.compile(r"#define DEVICE_INTERFACE_VERSION (\d+)")
 def get_version(dest: str = DEFAULT_DEST) -> str:
     """Return version string, given a path to the mmCoreAndDevices folder.
 
-    The version string is: DIV.YYYYMMDD.dev+g<short_sha>
+    The version string is: DIV.YYYYMMDD with optional .postX suffix if
+    versions already exist on PyPI for that date.
     """
     if not (Path(dest) / "MMDevice" / "MMDevice.h").exists():
         raise FileNotFoundError(
@@ -24,13 +27,64 @@ def get_version(dest: str = DEFAULT_DEST) -> str:
         )
     match = DIV_RE.search((Path(dest) / "MMDevice" / "MMDevice.h").read_text())
     assert match, "Could not find DEVICE_INTERFACE_VERSION in MMDevice.h"
-    real_sha = subprocess.check_output(["git", "-C", dest, "rev-parse", "HEAD"])
-    short_sha = real_sha.decode("utf-8").strip()[:7]
+
     _date = subprocess.check_output(
         ["git", "-C", dest, "log", "-1", "--format=%cd", "--date=format:'%Y%m%d'"]
     )
     date = _date.decode("utf-8").strip().replace("'", "")
-    return f"{match.group(1)}.{date}.dev+g{short_sha}"
+
+    # Create base version
+    version = f"{match.group(1)}.{date}"
+
+    # Check PyPI for existing versions and determine post number
+    if post_number := _get_next_pypi_post_version("mm-test-adapters", version):
+        version += f".post{post_number}"
+    return version
+
+
+def _get_next_pypi_post_version(package_name: str, version_prefix: str) -> int:
+    """Check PyPI for existing versions and return next `.postX` version.
+
+    Args:
+        package_name: The PyPI package name (e.g., 'mm-test-adapters')
+        version_prefix: Version prefix to check (e.g., '71.20250825')
+    """
+    try:
+        url = f"https://pypi.org/pypi/{package_name}/json"
+        with urllib.request.urlopen(url) as response:
+            data = json.loads(response.read().decode())
+        releases: dict[str, list[dict]] = data.get("releases", {})
+
+        # Find all versions that start with our prefix
+        matching_versions = [v for v in releases.keys() if v.startswith(version_prefix)]
+
+        if not matching_versions:
+            return 0
+
+        # Extract post numbers from matching versions
+        post_numbers = []
+        for version in matching_versions:
+            if version == version_prefix:
+                post_numbers.append(0)  # Base version without .postX
+            elif version.startswith(f"{version_prefix}.post"):
+                try:
+                    post_num = int(version.split(".post")[1])
+                    post_numbers.append(post_num)
+                except (IndexError, ValueError):
+                    continue
+
+        # Return the next post number
+        return max(post_numbers) + 1 if post_numbers else 0
+
+    except Exception:
+        # If we can't reach PyPI or package doesn't exist, start with 0
+        return 0
+
+
+def get_sha(dest: str = DEFAULT_DEST) -> str:
+    real_sha = subprocess.check_output(["git", "-C", dest, "rev-parse", "HEAD"])
+    short_sha = real_sha.decode("utf-8").strip()[:7]
+    return short_sha
 
 
 def fix_library_names(lib_dir: str | Path) -> None:

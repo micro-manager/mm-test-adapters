@@ -12,18 +12,24 @@ sys.path.append(".")
 import fetch
 
 MM_SHA = os.environ.get("MM_SHA", "main").lower()
-VERSION_FILE = Path("src/mm_test_adapters/_version.py")
+VERSION_FILE = Path("src/mm_test_adapters/version.py")
 
 
 def write_version() -> str:
     version = fetch.fetch_sources(sha=MM_SHA)
-    VERSION_FILE.write_text(f'__version__ = "{version}"\n')
+    sha = fetch.get_sha()
+    VERSION_FILE.write_text(
+        f'__version__ = "{version}"\n'
+        f'GIT_REF = "{sha}"\n'
+        f'URL = "{fetch.DEFAULT_REPO}/tree/{sha}"'
+    )
     return version
 
 
 def get_version():
     if VERSION_FILE.exists():
-        return VERSION_FILE.read_text().strip().split(" = ")[1].strip('"')
+        version_text = VERSION_FILE.read_text().strip().split("\n")[0]
+        return version_text.split(" = ")[1].strip('"')
     else:
         try:
             return write_version()

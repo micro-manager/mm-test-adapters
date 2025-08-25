@@ -6,7 +6,7 @@ This package provides pre-compiled test adapters for Micro-Manager.
 import os.path
 
 try:
-    from ._version import __version__
+    from .version import __version__
 except ImportError:
     __version__ = "uninstalled"
 
