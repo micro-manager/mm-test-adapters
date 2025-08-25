@@ -87,7 +87,7 @@ def get_sha(dest: str = DEFAULT_DEST) -> str:
     return short_sha
 
 
-def fix_library_names(lib_dir: str | Path) -> None:
+def fix_library_names(lib_dir: str) -> None:
     """Fix names of *nix libraries in the specified directory.
 
     - For each file in the adapters directory:

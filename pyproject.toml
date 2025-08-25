@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mm-test-adapters"
 dynamic = ["version"]
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 readme = "README.md"
 dependencies = []
 
@@ -21,3 +21,17 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.cibuildwheel]
+build-verbosity = 1
+build = [
+	"cp39-win_amd64",
+	"cp39-manylinux_x86_64",
+	"cp39-macosx_x86_64",
+	"cp39-macosx_arm64",
+]
+manylinux-x86_64-image = "manylinux_2_28"
+build-frontend = "build[uv]"
+test-command = "pytest {project}/tests -v"
+test-groups = ["test"]
+environment-pass = ["MM_SHA"]

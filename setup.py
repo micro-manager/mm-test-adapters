@@ -44,6 +44,11 @@ class CustomSdist(sdist):
 
 
 class CustomBdistWheel(bdist_wheel):
+    def get_tag(self):
+        # Get the base tags
+        python_tag, abi_tag, plat_tag = super().get_tag()
+        return python_tag, 'none', plat_tag
+    
     def write_wheelfile(self, wheelfile_base: str, **kwargs: Any) -> None:
         lib_dir = os.path.join(str(self.bdist_dir), "mm_test_adapters", "libs")
         fetch.build_libs(lib_dir)

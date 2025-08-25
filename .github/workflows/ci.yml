@@ -29,6 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.9"
       - name: build
         run: uv run --no-dev --group build fetch.py --build --sha ${{ github.event.inputs.submodule_sha || 'main' }}
 
@@ -51,6 +53,61 @@ jobs:
           name: mm-test-adapters-${{ runner.os }}-${{ runner.arch }}
           path: mm-test-adapters-${{ runner.os }}-${{ runner.arch }}.zip
 
+  build-sdist:
+    runs-on: ubuntu-latest
+    env:
+      MM_SHA: ${{ github.event.inputs.submodule_sha || 'main' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: hynek/build-and-inspect-python-package@v2
+        with:
+          skip-wheel: true
+
+  build-wheels:
+    name: ${{ matrix.os }} wheel
+    runs-on: ${{ matrix.os }}
+    env:
+      MM_SHA: ${{ github.event.inputs.submodule_sha || 'main' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - name: Build wheels via cibuildwheel
+        uses: pypa/cibuildwheel@v3.1
+
+      - name: Upload wheels artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ runner.os }}-${{ runner.arch }}
+          path: ./wheelhouse/*.whl
+
+  publish-to-pypi:
+    name: Publish to PyPI
+    needs: [build-sdist, build-wheels]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Get sdist
+        uses: actions/download-artifact@v5
+        with:
+          name: Packages
+          path: dist
+      - name: Get wheels
+        uses: actions/download-artifact@v5
+        with:
+          pattern: cibw-wheels-*
+          path: dist
+          merge-multiple: true
+
+      - name: 🚢 Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
   create-github-release:
     name: Create Release
     needs: build
@@ -71,7 +128,7 @@ jobs:
           release_tag=$(uv run fetch.py --sha ${{ github.event.inputs.submodule_sha || 'main' }})
           echo "release_tag=$release_tag" >> $GITHUB_OUTPUT
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           path: artifacts
 
@@ -86,19 +143,3 @@ jobs:
           name: ${{ steps.tag.outputs.release_name }}
           draft: false
           prerelease: false
-
-  create-pypi-release:
-    name: Deploy
-    needs: build
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v6
-      - run: uv build
-        env:
-          MM_SHA: ${{ github.event.inputs.submodule_sha || 'main' }}
-      - name: 🚢 Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1

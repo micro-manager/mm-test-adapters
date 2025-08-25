@@ -23,3 +23,4 @@ src/mm_test_adapters/version.py
 src/mm_test_adapters/libs/*
 src/mmCoreAndDevices
 *.egg-info/
+wheelhouse
