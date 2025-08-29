@@ -37,11 +37,16 @@ else
   ]
 endif
 
+# Dynamic source discovery using Python script
+py = find_program('python3')
+
 # DEMO CAMERA -----------------------------
+
+democamera_sources = run_command(py, 'discover_sources.py', 'DemoCamera', check: true).stdout().strip().split('\n')
 
 shared_library(
   'mmgr_dal_DemoCamera',
-  ['src/mmCoreAndDevices/DeviceAdapters/DemoCamera/DemoCamera.cpp'],
+  democamera_sources,
   cpp_args: device_cpp_args,
   dependencies: [mmdevice_dep, winmm_lib],
   install: true,
@@ -49,26 +54,11 @@ shared_library(
 
 # UTILITIES --------------------------------
 
+utilities_sources = run_command(py, 'discover_sources.py', 'Utilities', check: true).stdout().strip().split('\n')
+
 shared_library(
   'mmgr_dal_Utilities',
-  sources: [
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/AutoFocusStage.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/ComboXYStage.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/DAGalvo.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/DAMonochromator.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/DAShutter.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/DATTLStateDevice.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/DAXYStage.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/DAZStage.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/MultiCamera.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/MultiDAStateDevice.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/MultiShutter.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/MultiStage.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/SerialDTRShutter.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/SingleAxisStage.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/StateDeviceShutter.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/Utilities/Utilities.cpp',
-  ],
+  sources: utilities_sources,
   cpp_args: device_cpp_args,
   dependencies: [mmdevice_dep],
   install: true,
@@ -76,11 +66,11 @@ shared_library(
 
 # NOTIFICATION TESTER ----------------------
 
+notificationtester_sources = run_command(py, 'discover_sources.py', 'NotificationTester', check: true).stdout().strip().split('\n')
+
 shared_library(
   'mmgr_dal_NotificationTester',
-  [
-    'src/mmCoreAndDevices/DeviceAdapters/NotificationTester/NotificationTester.cpp',
-  ],
+  notificationtester_sources,
   cpp_args: device_cpp_args,
   dependencies: [mmdevice_dep],
   install: true,
@@ -88,16 +78,11 @@ shared_library(
 
 # SEQUENCE TESTER ------------------------
 
+sequencetester_sources = run_command(py, 'discover_sources.py', 'SequenceTester', check: true).stdout().strip().split('\n')
+
 shared_library(
   'mmgr_dal_SequenceTester',
-  sources: [
-    'src/mmCoreAndDevices/DeviceAdapters/SequenceTester/InterDevice.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/SequenceTester/LoggedSetting.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/SequenceTester/SequenceTester.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/SequenceTester/SettingLogger.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/SequenceTester/TextImage.cpp',
-    'src/mmCoreAndDevices/DeviceAdapters/SequenceTester/TriggerInput.cpp',
-  ],
+  sources: sequencetester_sources,
   cpp_args: device_cpp_args,
   dependencies: [mmdevice_dep, msgpack_dep, boost_dep],
   install: true,

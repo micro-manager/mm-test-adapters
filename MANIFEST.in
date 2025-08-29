@@ -1,5 +1,6 @@
 include meson.build
 include fetch.py
+include discover_sources.py
 include src/MMConfig_demo.cfg
 
 recursive-include src/mmCoreAndDevices/DeviceAdapters *
