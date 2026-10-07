@@ -18,8 +18,8 @@ endif
 
 winmm_lib = cxx.find_library('Winmm', required: false)
 mmdevice_dep = dependency('mmdevice', fallback: ['mmdevice', 'mmdevice_dep'])
-msgpack_dep = dependency('msgpack-cxx', fallback: ['msgpack-cxx', 'msgpack_cxx_dep'])
 boost_dep = dependency('boost', fallback: ['boost', 'boost_dep'], include_type: 'system')
+msgpack_dep = dependency('msgpack-cxx', fallback: ['msgpack-cxx', 'msgpack_dep'])
 
 if is_windows
   device_cpp_args = [

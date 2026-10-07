@@ -1,5 +1,5 @@
 project('msgpack-cxx', 'cpp', version: '7.0.0')
-boost_dep = dependency('boost', include_type: 'system')
+boost_dep = dependency('boost', fallback: ['boost', 'boost_dep'], include_type: 'system')
 
 msgpack_dep = declare_dependency(
   include_directories : include_directories('include'),
