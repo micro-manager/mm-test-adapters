@@ -33,6 +33,13 @@ jobs:
           python-version: "3.9"
       - name: build
         run: uv run --no-dev --group build fetch.py --build --sha ${{ github.event.inputs.submodule_sha || 'main' }}
+      - name: debug subprojects
+        if: failure()
+        shell: bash
+        run: |
+          ls -la subprojects subprojects/*/ || true
+          cat subprojects/boost_1_83_0/meson.build || true
+          cat subprojects/msgpack-cxx-7.0.0/meson.build || true
 
       - run: uv run pytest -v
 
