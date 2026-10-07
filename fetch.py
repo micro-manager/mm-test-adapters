@@ -127,10 +127,17 @@ def fetch_sources(
 
     subprocess.check_call(["git", "-C", dest, "sparse-checkout", "init", "--no-cone"])
     subprocess.check_call(
-        ["git", "-C", dest, "sparse-checkout", "set", "/MMDevice/MMDevice.h"]
+        ["git", "-C", dest, "sparse-checkout", "set", "/MMDevice/"]
         + [f"DeviceAdapters/{device}" for device in devices]
     )
     return get_version(dest)
+
+
+def _copy_mmdevice(dest: str = DEFAULT_DEST) -> None:
+    """Copy MMDevice from `dest` into subprojects, so it matches the adapter SHA."""
+    target = Path("subprojects/mmdevice")
+    shutil.rmtree(target, ignore_errors=True)
+    shutil.copytree(Path(dest) / "MMDevice", target)
 
 
 def build_libs(libdir: str = DEFAULT_LIBDIR) -> None:
@@ -140,6 +147,7 @@ def build_libs(libdir: str = DEFAULT_LIBDIR) -> None:
     assumes that sources live in `src/mmCoreAndDevices`... so won't work if
     `fetch_sources` was used without `dest=src/mmCoreAndDevices`.
     """
+    _copy_mmdevice()
     subprocess.check_call(
         [
             "meson",

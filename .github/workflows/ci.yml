@@ -17,6 +17,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # sha from manual dispatch, or from mmCoreAndDevices' repository_dispatch payload
+  MM_SHA: ${{ github.event.inputs.submodule_sha || github.event.client_payload.source_sha || 'main' }}
+
 jobs:
   build:
     name: build ${{ matrix.os }}
@@ -32,7 +36,14 @@ jobs:
         with:
           python-version: "3.9"
       - name: build
-        run: uv run --no-dev --group build fetch.py --build --sha ${{ github.event.inputs.submodule_sha || 'main' }}
+        run: uv run --no-dev --group build fetch.py --build --sha ${{ env.MM_SHA }}
+      - name: debug subprojects
+        if: failure()
+        shell: bash
+        run: |
+          ls -la subprojects subprojects/*/ || true
+          cat subprojects/boost_1_83_0/meson.build || true
+          cat subprojects/msgpack-cxx-7.0.0/meson.build || true
 
       - run: uv run pytest -v
 
@@ -55,8 +66,6 @@ jobs:
 
   build-sdist:
     runs-on: ubuntu-latest
-    env:
-      MM_SHA: ${{ github.event.inputs.submodule_sha || 'main' }}
     steps:
       - uses: actions/checkout@v5
       - uses: hynek/build-and-inspect-python-package@v2
@@ -66,8 +75,6 @@ jobs:
   build-wheels:
     name: ${{ matrix.os }} wheel
     runs-on: ${{ matrix.os }}
-    env:
-      MM_SHA: ${{ github.event.inputs.submodule_sha || 'main' }}
     strategy:
       fail-fast: false
       matrix:
@@ -101,7 +108,7 @@ jobs:
       - name: Compute release tag
         id: tag
         run: |
-          release_tag=$(uv run fetch.py --sha ${{ github.event.inputs.submodule_sha || 'main' }})
+          release_tag=$(uv run fetch.py --sha ${{ env.MM_SHA }})
           echo "release_tag=$release_tag" >> $GITHUB_OUTPUT
 
       - uses: actions/download-artifact@v5
